@@ -346,44 +346,45 @@ Conociendo este resultado, probar la igualdad pedida es sencillo:
 
 \begin{enunciado}
 	
-	Probar que en el ámbito del \emph{temporal coding} y supongiendo $\delta t \ll 1/r$, entonces la entropía es:
+	Probar que en el ámbito del \emph{temporal encoding} y suponiendo $\triangle t \ll 1/r$, entonces la entropía es:
 	
 	\[
-		H \approx Tr \log_w(\frac{e}{r \delta t})
+		H \approx Tr \log_2(\frac{e}{r \triangle t})
 	\]
 \end{enunciado}
 
-Antes de probar la igualdad requerida especificaremos una serie de definiciones naturales en el contexto del \emph{temporal coding}:
+Antes de probar la igualdad requerida especificaremos una serie de definiciones naturales en el contexto del \emph{temporal encoding}:
 
-Dado un tren de \emph{spikes} y un tamaño de ventana $\delta t$, asignaremos un $1$ a la ventana si hay un spike en ella y un $0$ si no:
+Dado un tren de \emph{spikes} y un tamaño de ventana $\triangle t$, asignaremos un $1$ a la ventana si hay un spike en ella y un $0$ si no:
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[scale=0.5]{figures/temporal_encoding.png}
-	\caption{Ejemplo de temporal coding}
+	\includegraphics[scale=0.5]{figures/temporal_encoding.PNG}
+	\caption{Ejemplo de temporal encoding}
 \end{figure}
 
-Denominaremos \emph{tren de spikes} a un conjunto de $T$ valores $0/1$ de nuestra serie temporal, donde $T$ es un número natural fijo. De esta forma, el número total de ventanas será $N = T/\delta t$. \\
+Denominaremos \emph{tren de spikes} a un conjunto de $T$ valores $0/1$ de nuestra serie temporal, donde $T$ es un número natural fijo. De esta forma, el número total de ventanas será $N = T/\triangle t$. \\
 
 Adicionalmente, definimos el \emph{firing rate} $r$ como el número medio de spikes por tren de spikes:
 
 \[
-	r = \frac{#spikes}{T}
+	r = \frac{\#spikes}{T}
 \]
 
-Estudiémos a continuación nuestra hipótesis $\delta t \ll 1/r$. Podemos reescribirla de la siguiente forma:
+Estudiémos a continuación nuestra hipótesis $\triangle t \ll 1/r$. Podemos reescribirla de la siguiente forma:
 
 \[
-	\delta t \ll \frac{1}{r} \iff r \delta t \ll 1
+	\triangle t \ll \frac{1}{r} \iff r \triangle t \ll 1
 \]
 
 Por otro lado, podemos estudiar la probabilidad de obtener un spike en una ventana aleatoria. Esto es:
 
 \[
-	P[\text{spike en ventana}] \equiv P = \frac{#spikes}{M} = \frac{#spikes}{T / \delta t} = \delta t \cdot \frac{#spikes}{T} = r \delta t
+	P[\text{spike en ventana}] \equiv P = \frac{\#spikes}{M} = \frac{\#spikes}{T / \\
+		 t} = \triangle t \cdot \frac{\#spikes}{T} = r \triangle t
 \]
 
-Es decir, nuestra hipótesis se traduce en que la probabilidad de encontrar un spike en una ventana sea mínima. Siempre podemos asegurar que este valor sea arbitrariamente pequeño mediante el valor del parámetro $\delta t$, por lo que siempre podemos asegurar esta hipótesis. \\
+Es decir, nuestra hipótesis se traduce en que la probabilidad de encontrar un spike en una ventana sea mínima. Siempre podemos asegurar que este valor sea arbitrariamente pequeño mediante el valor del parámetro $\triangle t$, por lo que siempre podemos asegurar esta hipótesis. \\
 
 Para estimar la entropía hemos de conocer la probabilidad de ocurrencia de cada evento. Para ello supondremos que extraemos un tren de spikes aleatoria y uniformemente entre todas las cadenas posibles. Consecuentemente, cada posible evento $x_i$ tendrá probabilidad de ocurrencia el inverso del número de cadenas posibles con ese número de $0$s y $1$s:
 
@@ -391,7 +392,7 @@ Para estimar la entropía hemos de conocer la probabilidad de ocurrencia de cada
 	P(x_i) = \frac{1}{\binom{N}{Tr}} \quad i \in \{1, \ldots, \binom{N}{Tr}\}
 \]
 
-Denominamos al número de spikes $N_1 \equiv #spikes = Tr$ al número de spikes o número de $1$, y $N_0 = N - N_1$ al número de $0$s. Dado que los sucesos son equiprobables, la entropía de un suceso viene dada por el logaritmo del número total de eventos denominado $E$:
+Denominamos al número de spikes $N_1 \equiv \#spikes = Tr$ al número de spikes o número de $1$, y $N_0 = N - N_1$ al número de $0$s. Dado que los sucesos son equiprobables, la entropía de un suceso viene dada por el logaritmo del número total de eventos denominado $E$:
 
 \[
 	\begin{align*}
@@ -411,7 +412,7 @@ donde hemos hecho uso del logaritmo natural. A continuación hemos de hacer uso 
 	\log n! = n \log n - n + O(\log n)
 \]
 
-Donde el término logaritmo $O(\log n)$ es despreciable frente a los polinómicos cuando $n \rightarrow \inf$. En particular, aproximaremos el susodicho valor por:
+Donde el término logaritmo $O(\log n)$ es despreciable frente a los polinómicos cuando $n \rightarrow \infty$. En particular, aproximaremos el susodicho valor por:
 
 \[
 	\log n! \approx n \log n - n = n (\log n - 1)
@@ -431,24 +432,24 @@ Utilizando esta aproximación y sabiendo que $N = N_0 + N_1$ obtenemos:
 	\end{align*}	
 \]
 
-Pues $P = N_1/N$ y $1 - P = N_0/N$. Finalmente, volvemos a los parámetros originales recordando que $r \delta t = P$ y $M = T / \delta t$:
+Pues $P = N_1/N$ y $1 - P = N_0/N$. Finalmente, volvemos a los parámetros originales recordando que $r \triangle t = P$ y $M = T / \triangle t$:
 
 \[
 	\begin{align*}
-		H & \approx - \frac{T}{\delta t \log 2} \bigg( (1 - r\delta t) \log (1 - r\delta t) + r\delta t \log (r\delta t) \bigg) \\
+		H & \approx - \frac{T}{\triangle t \log 2} \bigg( (1 - r\triangle t) \log (1 - r\triangle t) + r\triangle t \log (r\triangle t) \bigg) \\
 	\end{align*}	
 \]
 
-Finalmente utilizamos el desarrollo en serie de Taylos de la función $log(1 + x)$, donde $x = -r\delta t$. Utilizando nuestra hipótesis $\delta t \ll 1/r$ podemos despreciar los términos de orden superior. Sustituyendo en la expresión anterior obtenemos:
+Finalmente utilizamos el desarrollo en serie de Taylos de la función $log(1 + x)$, donde $x = -r\triangle t$. Utilizando nuestra hipótesis $\triangle t \ll 1/r$ podemos despreciar los términos de orden superior. Sustituyendo en la expresión anterior obtenemos:
 
 \[
 	\begin{align*}
-		H & \approx - \frac{T}{\delta t \log 2} \bigg( r\delta t \log (r\delta t) + (1 - r\delta t) (- r\delta t) \bigg) \\
-		& \approx - \frac{T}{\delta t \log 2} \bigg( r\delta t \log (r\delta t) - r\delta t \bigg) \\
-		& = - \frac{T \cdot r\delta t}{\delta t \log 2} (\log (r\delta t) - 1) \\
-		& = - \frac{Tr}{\log 2} (\log (r\delta t) - \log e) \\
-		& = \frac{Tr}{\log 2} \log \frac{e}{r\delta t} \\
-		& = Tr \log_2 \frac{e}{r\delta t}
+		H & \approx - \frac{T}{\triangle t \log 2} \bigg( r\triangle t \log (r\triangle t) + (1 - r\triangle t) (- r\triangle t) \bigg) \\
+		& \approx - \frac{T}{\triangle t \log 2} \bigg( r\triangle t \log (r\triangle t) - r\triangle t \bigg) \\
+		& = - \frac{T \cdot r\triangle t}{\triangle t \log 2} (\log (r\triangle t) - 1) \\
+		& = - \frac{Tr}{\log 2} (\log (r\triangle t) - \log e) \\
+		& = \frac{Tr}{\log 2} \log \frac{e}{r\triangle t} \\
+		& = Tr \log_2 \frac{e}{r\triangle t}
 	\end{align*}
 \]
 \qed
