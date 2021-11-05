@@ -71,7 +71,6 @@
 \newtheorem*{theorem*}{Teorema}
 \newtheorem{theorem}{Teorema}
 
-
 \usepackage{mathtools}
 \usepackage[shortlabels]{enumitem}
 \DeclarePairedDelimiter\abs{\lvert}{\rvert}%
@@ -347,11 +346,112 @@ Conociendo este resultado, probar la igualdad pedida es sencillo:
 
 \begin{enunciado}
 	
-	TODO
+	Probar que en el ámbito del \emph{temporal coding} y supongiendo $\delta t \ll 1/r$, entonces la entropía es:
 	
+	\[
+		H \approx Tr \log_w(\frac{e}{r \delta t})
+	\]
 \end{enunciado}
 
+Antes de probar la igualdad requerida especificaremos una serie de definiciones naturales en el contexto del \emph{temporal coding}:
 
+Dado un tren de \emph{spikes} y un tamaño de ventana $\delta t$, asignaremos un $1$ a la ventana si hay un spike en ella y un $0$ si no:
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[scale=0.5]{figures/temporal_encoding.png}
+	\caption{Ejemplo de temporal coding}
+\end{figure}
+
+Denominaremos \emph{tren de spikes} a un conjunto de $T$ valores $0/1$ de nuestra serie temporal, donde $T$ es un número natural fijo. De esta forma, el número total de ventanas será $N = T/\delta t$. \\
+
+Adicionalmente, definimos el \emph{firing rate} $r$ como el número medio de spikes por tren de spikes:
+
+\[
+	r = \frac{#spikes}{T}
+\]
+
+Estudiémos a continuación nuestra hipótesis $\delta t \ll 1/r$. Podemos reescribirla de la siguiente forma:
+
+\[
+	\delta t \ll \frac{1}{r} \iff r \delta t \ll 1
+\]
+
+Por otro lado, podemos estudiar la probabilidad de obtener un spike en una ventana aleatoria. Esto es:
+
+\[
+	P[\text{spike en ventana}] \equiv P = \frac{#spikes}{M} = \frac{#spikes}{T / \delta t} = \delta t \cdot \frac{#spikes}{T} = r \delta t
+\]
+
+Es decir, nuestra hipótesis se traduce en que la probabilidad de encontrar un spike en una ventana sea mínima. Siempre podemos asegurar que este valor sea arbitrariamente pequeño mediante el valor del parámetro $\delta t$, por lo que siempre podemos asegurar esta hipótesis. \\
+
+Para estimar la entropía hemos de conocer la probabilidad de ocurrencia de cada evento. Para ello supondremos que extraemos un tren de spikes aleatoria y uniformemente entre todas las cadenas posibles. Consecuentemente, cada posible evento $x_i$ tendrá probabilidad de ocurrencia el inverso del número de cadenas posibles con ese número de $0$s y $1$s:
+
+\[
+	P(x_i) = \frac{1}{\binom{N}{Tr}} \quad i \in \{1, \ldots, \binom{N}{Tr}\}
+\]
+
+Denominamos al número de spikes $N_1 \equiv #spikes = Tr$ al número de spikes o número de $1$, y $N_0 = N - N_1$ al número de $0$s. Dado que los sucesos son equiprobables, la entropía de un suceso viene dada por el logaritmo del número total de eventos denominado $E$:
+
+\[
+	\begin{align*}
+		H & = \sum_x \underbrace{P(x)}_{= 1/E} * \log_2 \frac{1}{P(x)} \\
+		& = E \sum_x * \log_2 \frac{1}{1 / E} \\
+		& = \frac{1}{E} \sum_x * \log_2 \frac{1}{1 / E} \\
+		& = \frac{1}{E} E \log_2 E \\
+		& = \log_2 E \\
+		& = \log_2 \binom{N}{N_1} \\
+		& = \frac{1}{\log 2} \bigg( \log N! - \log N_0! - log N_1! \bigg)
+	\end{align*}	
+\]
+
+donde hemos hecho uso del logaritmo natural. A continuación hemos de hacer uso de la \href{https://en.wikipedia.org/wiki/Stirling\%27s_approximation}{aproximación de Stirling} para obtener una expresión del logaritmo de un número factorial:
+
+\[
+	\log n! = n \log n - n + O(\log n)
+\]
+
+Donde el término logaritmo $O(\log n)$ es despreciable frente a los polinómicos cuando $n \rightarrow \inf$. En particular, aproximaremos el susodicho valor por:
+
+\[
+	\log n! \approx n \log n - n = n (\log n - 1)
+\]
+
+Utilizando esta aproximación y sabiendo que $N = N_0 + N_1$ obtenemos:
+
+\[
+	\begin{align*}
+		H & = \frac{1}{\log 2} \bigg( \log N! - \log N_0! - log N_1! \bigg) \\
+		& \approx \frac{1}{\log 2} \bigg( N (\log N - 1) - N_0 (\log N_0 - 1) - N_1 (log N_1 - 1) \bigg) \\
+		& = \frac{1}{\log 2} \bigg( N \log N + N_0 \log N_0  + N_1 log N_1 + (N_0 + N_1 - N) \bigg) \\
+		& = \frac{1}{\log 2} \bigg( N_0 (\log N - \log N_0) + N_1 (\log N - \log N_1) \bigg) \\
+		& = - \frac{N}{\log 2} \bigg( \frac{N_0}{N} \log \frac{N_0}{N} + \frac{N_1}{N} \log \frac{N_1}{N} \bigg) \\
+		& = - \frac{N}{\log 2} \bigg( \frac{N_0}{N} \log \frac{N_0}{N} + \frac{N_1}{N} \log \frac{N_1}{N} \bigg) \\
+		& = - \frac{N}{\log 2} \bigg( (1-P) \log (1-P) + P \log P \bigg) \\
+	\end{align*}	
+\]
+
+Pues $P = N_1/N$ y $1 - P = N_0/N$. Finalmente, volvemos a los parámetros originales recordando que $r \delta t = P$ y $M = T / \delta t$:
+
+\[
+	\begin{align*}
+		H & \approx - \frac{T}{\delta t \log 2} \bigg( (1 - r\delta t) \log (1 - r\delta t) + r\delta t \log (r\delta t) \bigg) \\
+	\end{align*}	
+\]
+
+Finalmente utilizamos el desarrollo en serie de Taylos de la función $log(1 + x)$, donde $x = -r\delta t$. Utilizando nuestra hipótesis $\delta t \ll 1/r$ podemos despreciar los términos de orden superior. Sustituyendo en la expresión anterior obtenemos:
+
+\[
+	\begin{align*}
+		H & \approx - \frac{T}{\delta t \log 2} \bigg( r\delta t \log (r\delta t) + (1 - r\delta t) (- r\delta t) \bigg) \\
+		& \approx - \frac{T}{\delta t \log 2} \bigg( r\delta t \log (r\delta t) - r\delta t \bigg) \\
+		& = - \frac{T \cdot r\delta t}{\delta t \log 2} (\log (r\delta t) - 1) \\
+		& = - \frac{Tr}{\log 2} (\log (r\delta t) - \log e) \\
+		& = \frac{Tr}{\log 2} \log \frac{e}{r\delta t} \\
+		& = Tr \log_2 \frac{e}{r\delta t}
+	\end{align*}
+\]
+\qed
 
 \begin{enunciado}
 	
@@ -369,11 +469,11 @@ Lo probaremos para el caso discreto. Para el caso contínuo es equivalente utili
 Recordemos las definiciones de entropías para varias variables que aparecen en el enunciado:
 
 \[
-\begin{align*}
-	H(X, Y | Z) & = - \sum_{x,y,z} P_{XYZ}(x,y,z) \log_2 P_{XY|Z}(x, y|z) \\
-	H(X|Z) & = - \sum_z P_Z(z) \sum_x P_{X|Z}(x|z) \log_2 P_{X|Z}(x|z) \\
-	H(Y |X, Z) & = - \sum_{x,z} P_{XZ}(x,z) \sum_y P_{Y|XZ}(y|x,z) \log_2 P_{Y|XZ}(y|x,z)
-\end{align*}
+	\begin{align*}
+		H(X, Y | Z) & = - \sum_{x,y,z} P_{XYZ}(x,y,z) \log_2 P_{XY|Z}(x, y|z) \\
+		H(X|Z) & = - \sum_z P_Z(z) \sum_x P_{X|Z}(x|z) \log_2 P_{X|Z}(x|z) \\
+		H(Y |X, Z) & = - \sum_{x,z} P_{XZ}(x,z) \sum_y P_{Y|XZ}(y|x,z) \log_2 P_{Y|XZ}(y|x,z)
+	\end{align*}
 \]
 
 Obtenemos la siguiente cadena de igualdades:
