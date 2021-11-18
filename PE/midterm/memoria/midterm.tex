@@ -4,6 +4,19 @@
 %	MIO
 %----------------------------------------------------------------------------------------
 
+% Comandos propios
+
+\definecolor{myBlue}{rgb}{1, 0.733, 0.612}
+\newcommand{\I}{\mathbb{I}}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\myparagraph}[1]{\paragraph*{ \\ #1}\mbox{}\\}
+
+\theoremstyle{plain}
+\newtheorem*{theorem*}{Teorema}
+\newtheorem{theorem}{Teorema}
+
+
 \setlength{\hoffset}{-3.2cm}
 \setlength{\voffset}{-3cm}
 \setlength{\textwidth}{18.7cm}
@@ -51,6 +64,48 @@ citecolor = black]{hyperref} % For hyperlinks in the PDF
 \fancyfoot[C]{} % Custom footer text
 \fancyfoot[R]{\thepage} % Custom footer text
 \newcommand{\note}[1]{\marginpar{\scriptsize \textcolor{red}{#1}}} % Enables comments in red on margin
+
+
+
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=black}
+\setlength{\parindent}{0in}
+\usepackage[margin=1.1in]{geometry}
+\usepackage[spanish]{babel}
+\usepackage{mathtools}
+\usepackage{palatino}
+\usepackage{fancyhdr}
+\usepackage{sectsty}
+\usepackage{engord}
+\usepackage{cite}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage[compact]{titlesec}
+\usepackage[center]{caption}
+\usepackage{placeins}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+\usetikzlibrary{bayesnet}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{decorations.text}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{minted}
+\usepackage{pdfpages}
+\usepackage[framemethod=TikZ]{mdframed} % Para entorno enunciado
+\usepackage{amsthm}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Entorno para enunciados
 %https://texblog.org/2015/09/30/fancy-boxes-for-theorem-lemma-and-proof-with-mdframed/
