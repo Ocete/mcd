@@ -34,6 +34,7 @@
 
 import math
 import random
+import numpy as np
 
 #########################################################################
 #
@@ -76,7 +77,7 @@ def minus_proj(x, y):
 #
 def mulmat(A, B):
     if len(A[0]) != len(B):
-        print "Matrix multiplication error"
+        print("Matrix multiplication error")
         sys.exit(1)
     n = len(A)
     u = len(A[0])
@@ -106,7 +107,7 @@ def mulmat(A, B):
 #
 def mulvec(A, v):
     if len(A[0]) != len(v):
-        print "Vector multiplication error"
+        print("Vector multiplication error")
         sys.exit(1)
     n = len(A)
     u = len(A[0])
@@ -179,17 +180,13 @@ def mk_mat(lb):
         L[k][k] = lb[k]
     (U, UT) = mk_ortho(n)
     A = mulmat(U, mulmat(L, UT))
-    return A
-
-Tstep = 50
+    return np.array(A)
 
 #
-# Just in case you need it, this is a function that defines the input
-# u
+# Just in case you need it, this is a function that defines the input u
 #
-def u_f(t):
+def u_f(t, Tstep=50):
     return 0.0 if t < Tstep else 1.0
-
 
 #
 # The matrices B and C are fixed, the matrix A must be defined using
@@ -209,11 +206,11 @@ def u_f(t):
 #     [1.0]
 #     ]
 
-B = [1.0, 1.0, 1.0, 1.0]
+B = np.array([1.0, 1.0, 1.0, 1.0])
 
-C = [ [1.0, 0.0, 0.0, 0.0],
+C = np.array([ [1.0, 0.0, 0.0, 0.0],
       [0.0, 1.0, 0.0, 0.0]
-    ]
+    ])
 
 #
 # This is an example of matrix A. You will have to generate your own
@@ -228,7 +225,7 @@ A = mk_mat(eigens)
 #
 sigma_w = 0.1
 
-Q = [ [(sigma_w if i == j else 0.0) for i in range(4)] for j in range(4)]
+Q = np.array([ [(sigma_w if i == j else 0.0) for i in range(4)] for j in range(4)])
 
 
 #
@@ -236,5 +233,6 @@ Q = [ [(sigma_w if i == j else 0.0) for i in range(4)] for j in range(4)]
 #
 sigma_v = 0.1
 
-R = [ [(sigma_w if i == j else 0.0) for i in range(2)] for j in range(2)]
+R = np.array([ [(sigma_w if i == j else 0.0) for i in range(2)] for j in range(2)])
+
 
