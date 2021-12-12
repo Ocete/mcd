@@ -14,39 +14,29 @@
 %	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\usepackage{mathtools}
 \usepackage{minted}
+\usepackage{mathtools}
 \usepackage[utf8]{inputenc} % Use UTF-8 encoding
 \usepackage{microtype} % Slightly tweak font spacing for aesthetics
 \usepackage[english]{babel} % Language hyphenation and typographical rules
 \usepackage{amsthm, amsmath, amssymb} % Mathematical typesetting
 \usepackage{float} % Improved interface for floating objects
-\usepackage[final, colorlinks = true, 
-linkcolor = black, 
+\usepackage[final, colorlinks = true, linkcolor = black, citecolor = black]{hyperref} % For hyperlinks in the PDF
 \usepackage{dsfont}
-%\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}%
 \usepackage{cancel}
-\usepackage{blindtext} % Package to generate dummy text
 \usepackage{charter} % Use the Charter font
 \usepackage{graphicx, multicol} % Enhanced support for graphics
 \usepackage{xcolor} % Driver-independent color extensions
-\usepackage{marvosym, wasysym} % More symbols
-\usepackage{rotating} % Rotation tools
-\usepackage{censor} % Facilities for controlling restricted text
-\usepackage{listings} % Environment for non-formatted code, !uses style file!
-\usepackage{pseudocode} % Environment for specifying algorithms in a natural way
-% Environment for f-structures, !uses style file!
 \usepackage{booktabs} % Enhances quality of tables
 \usepackage{tikz-qtree} % Easy tree drawing tool
 % Configuration for b-trees and b+-trees, !uses style file!
 %\usepackage[backend=biber,style=numeric,
 %            sorting=nyt]{biblatex} % Complete reimplementation of bibliographic facilities
 %\addbibresource{ecl.bib}
-\usepackage{csquotes} % Context sensitive quotation facilities
-%\usepackage[yyyymmdd]{datetime} % Uses YEAR-MONTH-DAY format for dates
+\usepackage[yyyymmdd]{datetime} % Uses YEAR-MONTH-DAY format for dates
 \renewcommand{\dateseparator}{-} % Sets dateseparator to '-'
 \usepackage{fancyhdr} % Headers and footers
-citecolor = black]{hyperref} % For hyperlinks in the PDF
 \pagestyle{fancy} % All pages have headers and footers
 \fancyhead{}\renewcommand{\headrulewidth}{0pt} % Blank out the default header
 \fancyfoot[L]{} % Custom footer text
@@ -85,7 +75,7 @@ citecolor = black]{hyperref} % For hyperlinks in the PDF
 \begin{minipage}{0.4\textwidth} 
 	\centering 
 	\large 
-	Entrega final\\ 
+	Final \\ 
 	\normalsize 
 	Procesos estocásticos discretos\\ 
 \end{minipage}
@@ -102,18 +92,18 @@ citecolor = black]{hyperref} % For hyperlinks in the PDF
 
 \section*{Ejercicio I.}
 
-\textbf{Enunciado.} En los apuntes hay el ejemplo del *gambler's ruin* como cadena de Markov:
+\textbf{Enunciado.} En los apuntes hay el ejemplo del \emph{gambler's ruin} como cadena de Markov:
 
 \begin{figure}[H]
-	\includegraphics[scale=.14]{figures/gamblers_ruin}
+	\includegraphics[scale=.6]{figures/gamblers_ruin}
 	\centering
 \end{figure}
 
-Donde estar en el nodo $i$ implica tener $i$ Euros, y $p$ y $q=1-p$ son las probabilidades de ganar en cada repetición del juego.
+Donde estar en el nodo $i$ implica tener $i$ Euros, y $p$ y $q=1-p$ son las probabilidades de ganar y perder respectivamente en cada repetición del juego. \\
 
-\textbf{a)} Hacer un gráfico del número medio de jugadas que el jugador puede hacer antes de arruinarse en función del dinero inicial. En cada jugada se juega $1$ Euro, y el juego es ecuo (el jugador tiene una probabilidad $p=1/2$ de ganar).
+\textbf{Apartado a)} Hacer un gráfico del número medio de jugadas que el jugador puede hacer antes de arruinarse en función del dinero inicial. En cada jugada se juega $1$ Euro, y el juego es ecuo (el jugador tiene una probabilidad $p=1/2$ de ganar). \\
 
-Sabemos por el estudio teórico realizado para este problema que en el caso de $p=q=\frac{1}{2}$, el jugador convergerá a arruinarse tarde o temprano. Sin embargo, la simulación puede tomar un tiempo arbitrariamente alto de tiempo si el dinero inicial es alto. Es por ello que hemos de poner un límite al número de iteraciones máximo que ejecutaremos nuestra simulación. Consideramos que $10^5$ es una cantidad aceptable de iteraciones para los bajos valores de dinero inicial que utilizaremos. Si se alcanza ese número de iteraciones podemos considerar que el jugador "se arruina en tiempo $10^5$, que es básicamente infinito.
+Sabemos por el estudio teórico realizado para este problema que en el caso de $p=q=\frac{1}{2}$, el jugador convergerá a arruinarse tarde o temprano. Sin embargo, la simulación puede tomar un tiempo arbitrariamente alto de tiempo si el dinero inicial es alto. Es por ello que hemos de poner un límite al número de iteraciones máximo que ejecutaremos nuestra simulación. Consideramos que $10^5$ es una cantidad aceptable de iteraciones para los bajos valores de dinero inicial que utilizaremos. Si se alcanza ese número de iteraciones podemos considerar que el jugador "se arruina en tiempo $10^5$, que es básicamente infinito. \\
 
 Implementamos la simulación de esta cadena de Markov y la ejecutamos $20$ veces, computando su media. Realizar esta simulación en múltiples ocasiones y utilizar la media es imprescindible para obtener resultados representativos en procesos de Monte Carlo como este.
 	
@@ -173,9 +163,9 @@ plot_mean_ruin_time(max_steps=10**5)
 \end{minted}
 	
 \begin{figure}[H]
-	\includegraphics[scale=.14]{figures/gambler1}
+	\includegraphics[scale=.6]{figures/gambler1}
 	\centering
-	\caption{Single simulation of Gambler's Ruin problem}
+	\caption{Mean time of 50 simulations of Gambler's Ruin process}
 \end{figure}
 
 

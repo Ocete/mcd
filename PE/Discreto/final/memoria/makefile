@@ -1,9 +1,10 @@
-all: midterm.pdf
+all: final.pdf
 
-midterm.pdf: midterm.tex clean
-	-pdflatex --shell-escape midterm.tex
+final.pdf: final.tex clean
+	-pdflatex --shell-escape final.tex
+	-pdflatex --shell-escape final.tex
 	$(MAKE) clean
-	cp midterm.pdf ../midterm.pdf
+	cp final.pdf ../final.pdf
 
 clean:
 	rm -f *.aux *.blg *.log *.bbl *.toc *.out *.bcf *.xml *.gz
