@@ -241,7 +241,7 @@ plot_ruin_time_estimation(n=100)
 
 Podemos apreciar que se reduce enormemente la comentada variabilidad: los valores obtenidos están mucho más alineados no hay tanta oscilación. Sin embargo, han aumentado tremendamente los valores medios entre este experimento y el anterior. Este se debe a que muchas más simulaciones han alcanzado el límite de tiempo impuesto, y la media sube enormemente. A pesar de ello, \textbf{podemos deducir que tanto el número de simulaciones que alcanzan el límite como el tiempo medio crecen de forma lineal}. Este resultado será clave para el próximo apartado. \\
 
-Por otro lado, es claro que al imponer este límite en las iteraciones estamos introduciendo un sesgo en los resultados: el tiempo medio aumenta considerablemente. Sin embargo, imponer un límite más alto sólo introduce un mayor sesgo. La conclusión es clara: \textbf{es realmente complicado obtener estimaciones insesgadas y precisas del tiempo que tarda el jugador en arruinarse}, debido al elevadísimo tiempo que medio que conlleva.
+Por otro lado, es claro que al imponer este límite en las iteraciones estamos introduciendo un sesgo en los resultados: el tiempo medio aumenta considerablemente. Sin embargo, imponer un límite más alto sólo introduce un mayor sesgo. La conclusión es clara: \textbf{es realmente complicado obtener estimaciones insesgadas y precisas del tiempo que tarda el jugador en arruinarse}, debido al elevadísimo tiempo que medio que conlleva. \\
 
 \textbf{Apartado c)} Dar una estimación de la función $T(e)$ que da el tiempo medio necesario para arruinarse en función de la cantidad inicial de dinero, e. Según esta función, ¿cuánto tarda el jugador en arruinarse si empieza a jugar con 200 Euros? \\
 
@@ -317,10 +317,278 @@ plot_ruin_time_regression(n=100)
 
 Obtenemos así dos predicciones, entre las cuales la más cercana al valor real -sesgado por el límite introducido- será la segunda: $83077.39$ será el tiempo medio que el jugador tardará en arruinarse. Suponiendo que una iteración del juego tarde $1$ minuto, el jugador tardaría en arruinarse, de media, $57.69$ días (sin parar de jugar).
 
-
 \section*{Ejercicio III.}
 
-\textbf{Enunciado.} En los apuntes hay el ejemplo del \emph{gambler's ruin} como cadena de Markov:
+\textbf{Apartado a)} Crear cuatro sistemas dinámicos del tipo:
+
+\[
+	x_{t+1} = A x_t + B u_t + w_t
+	z_t = C x_t + v_t
+\]
+
+con $x_t \in \R^4, u_t \in \R, z_t \R^2$, y
+
+\[
+	B = \begin{pmatrix} 1 & 1 & 1 & 1 \end{pmatrix}'
+	C = \begin{pmatrix}
+		1 & 0 & 0 & 0 \\
+		0 & 1 & 0 & 0
+	\end{pmatrix}'
+\]
+
+Los sistema se distinguen por la matrix $A$, que es, por cada sistema una de las cuatro matrices generadas usando la función \emph{mk\_mat} (en el fichero \emph{kalman\_aux}) a partir de las siguientes listas de autovalores:
+
+\[
+	\Lambda_1 = \begin{pmatrix} 0.2 & 0.2 & 0 & -0.1 \end{pmatrix}
+	\Lambda_2 = \begin{pmatrix} 0.99 & 0.1 & 0 & -0.1 \end{pmatrix}
+	\Lambda_3 = \begin{pmatrix} 1 & 0.1 & 0 & -0.1 \end{pmatrix}
+	\Lambda_4 = \begin{pmatrix} 0.2 & 0.1 & 0 & -1 \end{pmatrix}
+\]
+
+Los ruidos $w_t \in \R^4$ y $v_t \in \R^2$ son gausiano y tienen matrices de covarianza
+
+\[
+	Q = \sigma_w \I_4
+	R = \sigma_v \I_2
+\]
+
+\textbf{Solución:} Creamos una clase que define este sistema dinámico. Para ello hemos de tener en cuenta que la matriz $A$ es variable y será pasado como parámetro al constructor. El resto de parámetros del sistema tendrán valores por defecto para no tener que preocuparnos por ellos sin perder generalidad. \\
+
+Para los valores iniciales tomaremos $x_0 = \hat x_0 = 0$, luego $P_0 = 0$. Esto no será especialmente relevante: las primeras iteraciones no podremos predecir bien ya que no conocemos los estados anteriores. Tras esto, el sistema se estabilizará y los errores que aparecerán serán consistentes. \\
+
+La implementación ha sido la siguiente:
+
+\begin{minted}{python}
+from kalman_aux import mk_mat, u_f, B, C, Q, R, sigma_v, sigma_w
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+
+def set_seed(s):
+	random.seed(s)
+	np.random.seed(s)
+
+class KalmanFilter():
+	def __init__(self, A, B=B, C=C, Q=Q, R=R, sigma_w=sigma_w, sigma_v=sigma_v,
+				 u_f=u_f, z_0=0, x_bar_0=0):
+		self.A = A
+		self.B = B
+		self.C = C
+		self.Q = Q
+		self.R = R
+		self.sigma_w = sigma_w
+		self.sigma_v = sigma_v
+		self.u_f = u_f
+		self.z_0 = z_0
+		self.x_0 = np.zeros((A.shape[0],))
+		self.x_bar_0 = x_bar_0
+		
+	def get_noisy_vector(self, n, mu=0, sigma=1):
+		return np.random.normal(mu, sigma, n)
+	
+	def simulate_kalman_filter(self, max_time):
+		n = self.A.shape[0]
+		z_t = self.z_0
+		x_t = self.x_0
+		x_bar = np.repeat(self.x_bar_0, n)
+		P_bar = np.zeros((n,n))
+		
+		abs_errors = np.array([])
+		xs_norms = np.array([])
+			
+		for t in range(0, max_time):
+			# Compute the next step of the system
+			w_t = self.get_noisy_vector(Q.shape[0], self.sigma_w)
+			v_t = self.get_noisy_vector(R.shape[0], self.sigma_v)
+			x_t = self.A @ x_t + self.B * self.u_f(t) + w_t
+			z_t = C @ x_t + v_t
+			
+			# Compute the Kalman filter
+			K_t = P_bar @ self.C.T @ np.linalg.inv( self.C @ P_bar @ self.C.T + self.R )
+			x_hat = x_bar + K_t @ (z_t - self.C @ x_bar)
+			P = (np.identity(n) - K_t @ self.C) @ P_bar
+			x_bar = self.A @ x_hat + self.B * self.u_f(t)
+			P_bar = self.A @ P @ self.A.T + self.Q
+			
+			# Save the error
+			abs_errors = np.append(abs_errors, np.trace(P))
+			xs_norms = np.append(xs_norms, np.linalg.norm(x_t))
+		
+		return abs_errors / xs_norms
+\end{minted}
+
+Creamos una función adicional que utiliza \emph{mk\_mat} proporcionada para crear la matriz $A$ proporcionando unicamente el índice del caso a estudiar:
+
+\begin{minted}{python}
+def get_test_case(i_test_case):
+	if i_test_case < 0 or i_test_case > 4:
+		exit('i_test_case must be an integer in [1,4]')
+	lambdas = [[0.2, 0.1, 0, -0.1], 
+			   [0.99, 0.1, 0, -0.1],
+			   [1, 0.1, 0, -0.1],
+			   [0.2, 0.1, 0, -1]]
+	return mk_mat(lambdas[i_test_case-1])
+\end{minted}
+
+\textbf{Apartado b)} Crear cuatro sistemas dinámicos del tipoÑ
+
+Por cada uno de los sistemas generados, crear un filtro de Kalman para estimar el estado de este sistema utilizando como función de input la función:
+
+\[
+	u(t) = \begin{cases}
+		0 \quad t \le 50 \\
+		1 \quad t > 50
+	\end{cases}
+\]
+
+Se haga la simulación con $t \in \{0, \ldots, 99\}$ y se dibuje un gráfico del error relativo:
+
+\[
+	e(t) = \sum_{k=1}^{t} \frac{\parallel\hat x_t - x_t\parallel^2}{\parallel x_t \parallel^2}
+\]
+
+\textbf{Solución:} En primer lugar, vale la pena destacar que el \textbf{error relativo} entre el valor real $x_t$ y nuestra predicción viene dado por la expresión
+
+\[
+	e_{relativo}(t) =\frac{\parallel\hat x_t - x_t\parallel^2}{\parallel x_t \parallel^2}
+\]
+
+Por otro lado, el \textbf{error relativo acumulado} en las $t$ primeras predicciones es el siguiente:
+
+\[
+	e_{relativo acum}(t) = \sum_{k=1}^{t} \frac{\parallel\hat x_k - x_k\parallel^2}{\parallel x_k \parallel^2}
+\]
+
+Interpreto que el enunciado pide el error relativo acumulado por la aparación del sumatorio, y es lo que dibujaremos para este apartado. \\
+
+Para ello ejecutamos la simulación para cada modelo un total de $100$ veces y computamos la media y desviación típica para cada tiempo fijo. Esto reduce la variabilidad introducida por el ruido y nos proporciona una visión más genérica del error relativo acumulado.
+
+\begin{minted}{python}
+def subplot_errors(axis, x, mean, std, model_name, color='b'):
+	axis.plot(x, mean, color=color)
+	axis.fill_between(x, mean-std, mean+std, color=color, alpha=.3)
+	axis.axvline(x=50, ymin=0, color='r', label='_nolegend_')
+	axis.axhline(y=0, xmin=0, color='black', label='_nolegend_')
+	axis.set_xlim([0,100])
+	axis.set_ylim([-0.05,0.5])
+	axis.set_xlabel('Time')
+	axis.set_ylabel('Relative error')
+	axis.set_title('Relative error of Kalman filter for {}'.format(model_name))
+	
+def plot_acum_errors(models, max_time=100, n_repetitions=100):
+	names = [ 'A_{}'.format(i) for i in range(1,5) ]
+	x = np.arange(1, 101)
+	acum_rel_errors = [
+		np.cumsum([ m.simulate_kalman_filter(max_time) for i in range(n_repetitions) ], axis=1)
+		for m in models
+	]
+	means = np.mean(acum_rel_errors, axis=1)
+	stds = np.std(acum_rel_errors, axis=1)
+	
+	_, axis = plt.subplots(2, 2, figsize=(20,15))  
+	axis = np.array(axis).flatten()
+	for i in range(4):
+		subplot_errors(axis[i], x, means[i], stds[i], names[i])
+		axis[i].legend(['Mean accum. error', '+-Std'])
+		axis[i].set_ylabel('Accumulated relative error')
+		axis[i].set_title('Accumulated relative error of Kalman filter for {}'.format(names[i]))
+		axis[i].relim() 
+		axis[i].autoscale()
+		
+set_seed(123) 
+models = [ KalmanFilter(get_test_case(i)) for i in range(1, 5) ]
+plot_acum_errors(models)
+\end{minted}
+
+\begin{figure}[H]
+	\includegraphics[scale=.6]{figures/kalman_acum}
+	\centering
+	\caption{Accumulative relative errors' comparative}
+\end{figure}
+
+Apreciamos en las gráficas anteriores como a partir de $t=50$ (la línea roja vertical), el crecimiento del error relativo acumulado se reduce considerablmente. Esto es, el error relativo disminuye a partir de dicho instánte. Compararemos los errores de los distintos modelos en detalle en el siguiente apartado. \\
+
+\textbf{Apartado c)} Discutir como los autovalores afectan el error. \\
+
+Para este último apartado haremos uso del error relativo en lugar del error relativo acumulado, será más sencillo visualizar el error en cada instante de esta forma. De forma análoga al apartado anterior, repetimos los experimentos $100$ para cada modelo y computamos la media y desviación típica punto a punto:
+
+\begin{minted}{python}
+def plot_errors(models, max_time=100, n_repetitions=100):
+	names = [ 'A_{}'.format(i) for i in range(1,5) ]
+	x = np.arange(1, 101)
+	rel_errors = [
+		[ m.simulate_kalman_filter(max_time) for i in range(n_repetitions) ]
+		for m in models
+	]
+	means = np.mean(rel_errors, axis=1)
+	stds = np.std(rel_errors, axis=1)
+	
+	_, axis = plt.subplots(2, 2, figsize=(20,15))  
+	axis = np.array(axis).flatten()
+	for i in range(4):
+		subplot_errors(axis[i], x, means[i], stds[i], names[i])
+		axis[i].legend(['Mean error', '+-Std'])
+
+set_seed(123)
+plot_errors(models)
+\end{minted}
+
+\begin{figure}[H]
+	\includegraphics[scale=.6]{figures/kalman1}
+	\centering
+	\caption{Relative error' comparative}
+\end{figure}
+
+Vemos como en este gráfico es notablemente más sencillo comparar los resultados obtenidos. A primera vista resalta como todos los errores pasan a reducirse notablemente a partir de la introducción del input en el instante $t=50$. En particular, los errores de los modelos $2$ y $3$ parecen converger a $0$, siendo la convergencia del segundo modelo ligeramente más rápida. Sin embargo, parece que los errores de los modelos $1$ y $4$ convergen a $0.1$, aunque con oscilaciones. \\
+
+Por otro lado, seguimos observando un alto número de oscilaciones en el error relativo medio a pesar de repetir el experimento $100$ veces. En sucesivos experimentos no presentados en esta memoria se ha observado como la matriz $A$ generada de forma aleatoria estaba introduciendo variabilidad adicional en los resultados del modelo. Es por ello que decimos realizar una experimento adicional para minimizar esta variabilidad. \\
+
+Para ello fijamos un tipo de modelo $i \ in \{1, \ldots, 4\}$, generamos $100$ matrices $A_i$ y para cada una de dichas matrices repetimos el experimento $100$ veces. Presentamos a continuación, para cada modelo, la media punto a punto realizada sobre tanto las $100$ ejecuciones como sobre las distintas $100$ matrices para dicho modelo, en verde. En azul mostramos los resultados del experimento anterior para poder compararlos.
+
+\begin{minted}{python}
+def plot_errors_boostrap(max_time=100, n_repetitions=100, n_copies_of_each_model_type=100):
+	x = np.arange(1, 101)
+	all_models = [
+		[ KalmanFilter(get_test_case(i)) for _ in range(n_copies_of_each_model_type) ]
+		for i in range(1, 5)
+	]
+	rel_errors = [
+		[
+			[ model.simulate_kalman_filter(max_time) for i in range(n_repetitions) ]
+			for model in i_models
+		]
+		for i_models in all_models
+	]
+	fixed_A_means = [ np.mean(model_A_i_errors[0], axis=0) for model_A_i_errors in rel_errors ]
+	fixed_A_stds = [ np.std(model_A_i_errors[0], axis=0) for model_A_i_errors in rel_errors ]
+	total_means = np.mean(rel_errors, axis=(1,2))
+	total_stds = np.std(rel_errors, axis=(1,2))
+	
+	names = [ 'A_{}'.format(i) for i in range(1,5) ]
+	_, axis = plt.subplots(2, 2, figsize=(20,15))  
+	axis = np.array(axis).flatten()
+	for i in range(4):
+		subplot_errors(axis[i], x, fixed_A_means[i], fixed_A_stds[i], names[i], color='b')
+		subplot_errors(axis[i], x, total_means[i], total_stds[i], names[i], color='green')
+		axis[i].legend(['A-fixed mean', 'Total mean', 'A-fixed +-Std', 'Total +-Std'])
+	
+set_seed(123)
+plot_errors_boostrap()
+\end{minted}
+
+\begin{figure}[H]
+	\includegraphics[scale=.6]{figures/kalman2}
+	\centering
+	\caption{Boostrap relative error' comparative}
+\end{figure}
+
+Vemos como efectivamente la variabilidad presente en los resultados anteriores se reduce: tanto el tiempo medio como las desviaciones típicas son más estables y fluctúan más suavamente. Observamos también como en algunos casos el error para el modelo fijado es mayor y en otras ocasiones menor que el error medio sobre múltiples modelos. \\
+
+En particular, apreciamos como nuestra conclusión sobre la rápida convergencia del modelo $2$ fue prematura: si observamos una convergencia a $0$ pero no tan rápida como supusimos. Por otro lado, la convergencia del modelo $3$ es ligeramente más rápida de lo esperado. \\
+
+Finalmente, los modelos $1$ y $4$ siguen pareciendo estabilizarse en $0.1$, aunque observamos una ligera tendencia decreciente en el cuarto. \\
+
+Para estudiar mejor la convergencia de estos sistemas realizamos un último experimento, aumentando el tiempo máximo de convergencia a $10^4$ en vez de $100$. Así mismo, reducimos el número de ejecuciones por matriz y de matrices por modelo de $100$ a $20$ (las ejecuciones anteriores ya requerían de unos $10$ minutos, y esta familia querrá irse a la cama en algún momento).
 
 
 \end{document}
