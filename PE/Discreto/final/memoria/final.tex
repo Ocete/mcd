@@ -477,7 +477,7 @@ def subplot_errors(axis, x, mean, std, model_name, color='b'):
 	
 def plot_acum_errors(models, max_time=100, n_repetitions=100):
 	names = [ 'A_{}'.format(i) for i in range(1,5) ]
-	x = np.arange(1, 101)
+	x = np.arange(1, max_time+1)
 	acum_rel_errors = [
 		np.cumsum([ m.simulate_kalman_filter(max_time) for i in range(n_repetitions) ], axis=1)
 		for m in models
@@ -515,7 +515,7 @@ Para este último apartado haremos uso del error relativo en lugar del error rel
 \begin{minted}{python}
 def plot_errors(models, max_time=100, n_repetitions=100):
 	names = [ 'A_{}'.format(i) for i in range(1,5) ]
-	x = np.arange(1, 101)
+	x = np.arange(1, max_time+1)
 	rel_errors = [
 		[ m.simulate_kalman_filter(max_time) for i in range(n_repetitions) ]
 		for m in models
@@ -547,7 +547,7 @@ Para ello fijamos un tipo de modelo $i \ in \{1, \ldots, 4\}$, generamos $100$ m
 
 \begin{minted}{python}
 def plot_errors_boostrap(max_time=100, n_repetitions=100, n_copies_of_each_model_type=100):
-	x = np.arange(1, 101)
+	x = np.arange(1, max_time+1)
 	all_models = [
 		[ KalmanFilter(get_test_case(i)) for _ in range(n_copies_of_each_model_type) ]
 		for i in range(1, 5)
@@ -588,7 +588,64 @@ En particular, apreciamos como nuestra conclusión sobre la rápida convergencia
 
 Finalmente, los modelos $1$ y $4$ siguen pareciendo estabilizarse en $0.1$, aunque observamos una ligera tendencia decreciente en el cuarto. \\
 
-Para estudiar mejor la convergencia de estos sistemas realizamos un último experimento, aumentando el tiempo máximo de convergencia a $10^4$ en vez de $100$. Así mismo, reducimos el número de ejecuciones por matriz y de matrices por modelo de $100$ a $20$ (las ejecuciones anteriores ya requerían de unos $10$ minutos, y esta familia querrá irse a la cama en algún momento).
+Para estudiar mejor la convergencia de estos sistemas realizamos un experimento adicional, aumentando el tiempo máximo de convergencia a $10^4$ en vez de $100$. Así mismo, reducimos el número de ejecuciones por matriz y de matrices por modelo de $100$ a $20$ (las ejecuciones anteriores ya requerían de unos $10$ minutos). Obtenemos los siguientes resultados:
 
+\begin{minted}{python}
+set_seed(123)
+plot_errors_boostrap(max_time=10**3, n_repetitions=20, n_copies_of_each_model_type=20)
+\end{minted}
+
+\begin{figure}[H]
+	\includegraphics[scale=.6]{figures/kalman3}
+	\centering
+	\caption{Boostrap relative error' comparative up to $t=10^3$}
+\end{figure}
+
+Aunque se ve un aumento sustancial de la variabilidad al disminuir las repeticiones realizadas, podemos sacar buenas conclusiones de resultados:
+
+\begin{enumerate}
+	\item El error del primer modelo se estabiliza cercano a $0.11$.
+	\item El error del segundo modelo se acerca notablemente más a $0$ pero no parecer estabilizarse sobre $\approx 0.3$. 
+	\item El error del tercer modelo converge rápidamente $0$, como ya sospechábamos. 
+	\item El error del cuarto modelo parece decrecer muy lentamente. Al llegar a $t=10^3$ se sitúa sobre  $\approx 0.5$, aunque es díficil asegurar mirándo estas gráficas si seguirá decreciendo o se estabilizará. 
+\end{enumerate}
+
+Antes de exponer las conclusiones finales, realizamos un experimento adicional para verificar si el cuarto modelo tiene un convergencia muy lenta o si no llega a converger. Para ello aumentamos el tiempo máximo de convergencia a $10^5$ en vez de $10^3$. Así mismo, reducimos el número de ejecuciones por matriz y de matrices por modelo de $20$ a $5$. Esto aumentará notablemente la variabilidad, pero es un mal necesario para realizar ejecucion en tal rango de tiempo.
+
+\begin{minted}{python}
+	set_seed(123)
+	plot_errors_boostrap(max_time=10**4, n_repetitions=5, n_copies_of_each_model_type=5)
+\end{minted}
+
+\begin{figure}[H]
+	\includegraphics[scale=.6]{figures/kalman4}
+	\centering
+	\caption{Boostrap relative error' comparative up to $t=10^4$}
+\end{figure}
+
+Aunque en la iteración de modelo fijo observamos que hay convergencia a partir de cierto valor, no queda claro observando las medias que este hecho ocurra para todos los modelos posibles. \\
+
+A continuación nos apoyámos en los resultados teóricos de la asignatura para aportar cierta luz sobre el resultado de estos experimentos. En primer lugar, sabemos por el Teorema $5.1$ que todos los valores propios han de estar en $\[-1, 1\]$, y que la multiplicidad del valor propio $1$ no puede ser mayor de $1$. Esto ocurre en todos nuestros modelos. \\
+
+En segundo lugar, sabemos que el valor propio $1$ está asociado a la probabilidad estacionaria $\pi$ (vector propio asociado). Este valor propio está presente en el tercer modelo, es por ello que observamos tal rápida e invariable convergencia. \\
+
+Del mismo modo, observamos que el segundo modelo tiene un valor propio muy cercano a $1$ ($0.99$). Esto se traduce en la casi-convergencia del error a $0$, pues oscilaremos ligeramente sin llegar a converger. \\
+
+Dado que el primer modelo tiene sus valores propios muy lejanos en valor absoluto a $1$, el modelo simplemente oscilará entre sus posibles estados, con probabilidades descritas por la matriz $A$. Esto se traduce en que las predicciones sean bastante improbables.\\
+
+Finalmente, el cuarto modelo presente un valor propio $-1$. Esto significa que el grafo asociado es bipartido. Además, como no tiene ningún valor propio $1$ sabemos que no puede darse convergencia a la probabilidad estacionaria. A pesar de ello, obtenemos errores muy bajos. Mi hipótesis del porqué de este hecho es que al tener un grafo bipartido con unicamente $4$ nodos, nuestra posibilidad de acertar de forma aleatoria es de $1/2$, en vez de $1/4$ como en el caso del primer modelo. \\
+
+Por otro lado, este modelo es ligeramente distinto al planteado en clase. En primer lugar, la matriz $C$ asociada a nuestra medición era $[1,0,0,0]'$, permitiéndonos conocer únicamente el estado anterior. Ahora esta matriz posee dos filas, y nos permite observar dos estados anteriores. \\
+
+Por otro lado y más importante, introducimos un input. No tengo claro como afecta esto a la convergencia en el caso más general, pero en nuestro caso particular, el input será constante a partir de un punto. Esto nos permite nuestro modelo de la siguiente forma, a partir de $t=50$:
+
+\[
+	x_{t+1} = A x_t + B u_t + w_t = A x_t + 1 \cdot B + w_t = A x_t + w_t'
+	z_t = C x_t + v_t
+\]
+
+Donde $\w_t'$ tendrán media $1$ y la misma matriz de covarianzas asociada. Es decir, es un modelo como el que conocemos. Como la varianza del ruido no varía, nuestra predicción será prácticamente igual de acertada. \\
+
+Entonces, ¿por qué vemos una reducción del error relativo a partir del instante $t=50$? La respuesta es sencilla: al sumar uno al sistema completo (tanto a las predicciones como a los valores reales de $x$), el error relativo es más pequeño porque depende de la norma de $x$. Es decir, nuestra predicción es mejor proporcionalmente porque hemos hecho más grandes los números que comparamos, pero la distancia entre ellos es prácticamente equivalente.
 
 \end{document}
