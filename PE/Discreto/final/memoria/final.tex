@@ -321,10 +321,10 @@ Obtenemos así dos predicciones, entre las cuales la más cercana al valor real 
 
 \textbf{Apartado a)} Crear cuatro sistemas dinámicos del tipo:
 
-\[
-	x_{t+1} = A x_t + B u_t + w_t
+\begin{gather*}
+	x_{t+1} = A x_t + B u_t + w_t \\
 	z_t = C x_t + v_t
-\]
+\end{gather*}
 
 con $x_t \in \R^4, u_t \in \R, z_t \R^2$, y
 
@@ -501,7 +501,7 @@ plot_acum_errors(models)
 \end{minted}
 
 \begin{figure}[H]
-	\includegraphics[scale=.6]{figures/kalman_acum}
+	\includegraphics[scale=.45]{figures/kalman_acum}
 	\centering
 	\caption{Accumulative relative errors' comparative}
 \end{figure}
@@ -534,9 +534,11 @@ plot_errors(models)
 \end{minted}
 
 \begin{figure}[H]
-	\includegraphics[scale=.6]{figures/kalman1}
+	\makebox[\textwidth][c]{
+		\includegraphics[scale=.45]{figures/kalman1}
+	}
 	\centering
-	\caption{Relative error' comparative}
+	\caption{Relative error's comparative}
 \end{figure}
 
 Vemos como en este gráfico es notablemente más sencillo comparar los resultados obtenidos. A primera vista resalta como todos los errores pasan a reducirse notablemente a partir de la introducción del input en el instante $t=50$. En particular, los errores de los modelos $2$ y $3$ parecen converger a $0$, siendo la convergencia del segundo modelo ligeramente más rápida. Sin embargo, parece que los errores de los modelos $1$ y $4$ convergen a $0.1$, aunque con oscilaciones. \\
@@ -577,7 +579,9 @@ plot_errors_boostrap()
 \end{minted}
 
 \begin{figure}[H]
-	\includegraphics[scale=.6]{figures/kalman2}
+	\makebox[\textwidth][c]{
+		\includegraphics[scale=.45]{figures/kalman2}
+	}
 	\centering
 	\caption{Boostrap relative error' comparative}
 \end{figure}
@@ -596,7 +600,9 @@ plot_errors_boostrap(max_time=10**3, n_repetitions=20, n_copies_of_each_model_ty
 \end{minted}
 
 \begin{figure}[H]
-	\includegraphics[scale=.6]{figures/kalman3}
+	\makebox[\textwidth][c]{
+		\includegraphics[scale=.45]{figures/kalman3}
+	}
 	\centering
 	\caption{Boostrap relative error' comparative up to $t=10^3$}
 \end{figure}
@@ -618,14 +624,16 @@ Antes de exponer las conclusiones finales, realizamos un experimento adicional p
 \end{minted}
 
 \begin{figure}[H]
-	\includegraphics[scale=.6]{figures/kalman4}
+	\makebox[\textwidth][c]{
+		\includegraphics[scale=.45]{figures/kalman4}
+	}
 	\centering
 	\caption{Boostrap relative error' comparative up to $t=10^4$}
 \end{figure}
 
 Aunque en la iteración de modelo fijo observamos que hay convergencia a partir de cierto valor, no queda claro observando las medias que este hecho ocurra para todos los modelos posibles. \\
 
-A continuación nos apoyámos en los resultados teóricos de la asignatura para aportar cierta luz sobre el resultado de estos experimentos. En primer lugar, sabemos por el Teorema $5.1$ que todos los valores propios han de estar en $\[-1, 1\]$, y que la multiplicidad del valor propio $1$ no puede ser mayor de $1$. Esto ocurre en todos nuestros modelos. \\
+A continuación nos apoyámos en los resultados teóricos de la asignatura para aportar cierta luz sobre el resultado de estos experimentos. En primer lugar, sabemos por el Teorema $5.1$ que todos los valores propios han de estar en $[-1, 1]$, y que la multiplicidad del valor propio $1$ no puede ser mayor de $1$. Esto ocurre en todos nuestros modelos. \\
 
 En segundo lugar, sabemos que el valor propio $1$ está asociado a la probabilidad estacionaria $\pi$ (vector propio asociado). Este valor propio está presente en el tercer modelo, es por ello que observamos tal rápida e invariable convergencia. \\
 
@@ -639,12 +647,12 @@ Por otro lado, este modelo es ligeramente distinto al planteado en clase. En pri
 
 Por otro lado y más importante, introducimos un input. No tengo claro como afecta esto a la convergencia en el caso más general, pero en nuestro caso particular, el input será constante a partir de un punto. Esto nos permite nuestro modelo de la siguiente forma, a partir de $t=50$:
 
-\[
-	x_{t+1} = A x_t + B u_t + w_t = A x_t + 1 \cdot B + w_t = A x_t + w_t'
+\begin{gather*}
+	x_{t+1} = A x_t + B u_t + w_t = A x_t + 1 \cdot B + w_t = A x_t + w_t' \\
 	z_t = C x_t + v_t
-\]
+\end{gather*}
 
-Donde $\w_t'$ tendrán media $1$ y la misma matriz de covarianzas asociada. Es decir, es un modelo como el que conocemos. Como la varianza del ruido no varía, nuestra predicción será prácticamente igual de acertada. \\
+Donde $w_t'$ tendrán media $1$ y la misma matriz de covarianzas asociada. Es decir, es un modelo como el que conocemos. Como la varianza del ruido no varía, nuestra predicción será prácticamente igual de acertada. \\
 
 Entonces, ¿por qué vemos una reducción del error relativo a partir del instante $t=50$? La respuesta es sencilla: al sumar uno al sistema completo (tanto a las predicciones como a los valores reales de $x$), el error relativo es más pequeño porque depende de la norma de $x$. Es decir, nuestra predicción es mejor proporcionalmente porque hemos hecho más grandes los números que comparamos, pero la distancia entre ellos es prácticamente equivalente.
 
