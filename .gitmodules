@@ -19,3 +19,6 @@
 [submodule "mcd-gd"]
 	path = mcd-gd
 	url = git@github.com:fjsaezm/mcd-gd.git
+[submodule "TI/mcd-ti"]
+	path = TI/mcd-ti
+	url = git@github.com:fjsaezm/mcd-ti.git
