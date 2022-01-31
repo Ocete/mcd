@@ -1,0 +1,18 @@
+[submodule "PE/mcd-pe-continuo"]
+	path = PE/mcd-pe-continuo
+	url = git@github.com:Ocete/mcd-pe-continuo.git
+[submodule "mcd-pdge"]
+	path = mcd-pdge
+	url = git@github.com:Ocete/mcd-pdge.git
+[submodule "mcd-cn"]
+	path = mcd-cn
+	url = git@github.com:Ocete/mcd-cn.git
+[submodule "mcd-mae"]
+	path = mcd-mae
+	url = git@github.com:Ocete/mcd-mae.git
+[submodule "mcd-maaa"]
+	path = mcd-maaa
+	url = git@github.com:fjsaezm/mcd-maaa.git
+[submodule "mcd-pst"]
+	path = mcd-pst
+	url = git@github.com:Ocete/mcd-pst.git
