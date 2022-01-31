@@ -16,3 +16,6 @@
 [submodule "mcd-pst"]
 	path = mcd-pst
 	url = git@github.com:Ocete/mcd-pst.git
+[submodule "mcd-gd"]
+	path = mcd-gd
+	url = git@github.com:fjsaezm/mcd-gd.git
